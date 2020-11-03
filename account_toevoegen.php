@@ -1,18 +1,27 @@
 <!-- Yusa Celiker -->
 <?php
 
-include 'database.php';
-include 'helperfunctions.php';
 
-if(isset($_POST['submit'])){
+session_start();
+
+if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true){
+    // header('location: login.php');
+    // exit;
+    echo 'meg';
+  }
+
+  include 'helperfunctions.php';
+  include 'database.php';
+  if(isset($_POST['submit'])){
+    echo 'submit';
 
   // maak een array met alle name attributes
   $fields = [
     	"voorletters",
-      "voorvoegsels",
-      "Achternaam",
-      "Gebruikersnaam",
-      "Wachtwoord"
+      // "voorvoegsels",
+      "achternaam",
+      "gebruikersnaam",
+      "wachtwoord"
   ];
 
 $obj = new HelperFunctions();
@@ -21,13 +30,13 @@ $no_error = $obj->has_provided_input_for_required_fields($fields);
   // in case of field values, proceed, execute insert
   if($no_error){
     $voorletters = $_POST['voorletters'];
-    $voorvoegsels = $_POST['voorvoegsels'];
-    $Achternaam = $_POST['Achternaam'];
-    $Gebruikersnaam = $_POST['Gebruikersnaam'];
-    $Wachtwoord =$_POST['Wachtwoord'];
+    $voorvoegsels = $_POST['voorvoegsels'] ? $_POST['voorvoegsels']  : '';
+    $achternaam = $_POST['achternaam'];
+    $gebruikersnaam = $_POST['gebruikersnaam'];
+    $wachtwoord =$_POST['wachtwoord'];
 
-    $db = new database('localhost', 'root', '', 'drempel', 'utf8');
-    $db->create_or_update_medewerker($voorletters, $voorvoegsels, $Achternaam, $Gebruikersnaam, $Wachtwoord);
+    $db = new database('localhost', 'root', '', 'drempeltoets', 'utf8');
+    $db->create_or_update_medewerker($voorletters, $voorvoegsels, $achternaam, $gebruikersnaam, $wachtwoord);
     }
 }
 ?>

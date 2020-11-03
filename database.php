@@ -1,17 +1,10 @@
 <!-- Yusa Celiker -->
 <?php
 
-// $host = '127.0.0.1';
-// $db   = 'drempel';
-// $user = 'root';
-// $pass = '';
-// $charset = 'utf8mb4';
-
-//class database aan gemaakt
 class database{
   // class met allemaal private variables aangemaakt (property)
   private $host;
-  private $database;
+  private $db;
   private $user;
   private $pass;
   private $charset;
@@ -20,15 +13,14 @@ class database{
   const ADMIN = 1; // moet overeen komen met values in de db!
   const USER = 2;
 
-  public function __construct($host, $user, $pass, $database, $charset){
+  public function __construct($host, $user, $pass, $db, $charset){
     $this->host = $host;
-    $this->user = $Gebruikersnaam;
-    $this->pass = $Wachtwoord;
-    $this->database = $database;
+    $this->user = $user;
+    $this->pass = $pass;
     $this->charset = $charset;
 
     try {
-        $dsn = "mysql:host=$host;dbname=$database;charset=$charset";
+        $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -43,45 +35,26 @@ class database{
     }
   }
 
-  private function create_or_update_medewerker($voorletters, $voorvoegsels, $Achternaam, $Gebruikersnaam, $Wachtwoord){
-
-    // try{
-    //       // begin een database transaction
-    //       $this->pdo->beginTransaction();
-    //
-    //       $medewerker_id = $this->create_or_update_medewerker($voorletters, $voorvoegsels, $Achternaam, $Gebruikersnaam, $Wachtwoord);
-    //       $this->create_or_update_medewerker($voorletters, $voorvoegsels, $Achternaam, $Gebruikersnaam, $Wachtwoord);
-    //             // commit
-    //             $this->pdo->commit();
-    //
-    //             header("location:login.php");
-    //             exit();
-    //
-    //           }catch(Exception $e){
-    //             // undo db changes in geval van error
-    //             $this->pdo->rollback();
-    //             throw $e;
-    //           }
-
-
-    $query = "INSERT INTO account
-          (id, voorletters, voorvoegsels, Achternaam, Gebruikersnaam, Wachtwoord)
+  public function create_or_update_medewerker($voorletters, $voorvoegsels, $achternaam, $gebruikersnaam, $wachtwoord){
+    echo 'party';
+    $query = "INSERT INTO medewerker
+          (id, voorletters, voorvoegsels, achternaam, gebruikersnaam, wachtwoord)
           VALUES
-          (NULL, :voorletters, :voorvoegsels, :Achternaam, :Gebruikersnaam, :Wachtwoord)";
+          (NULL, :voorletters, :voorvoegsels, :achternaam, :gebruikersnaam, :wachtwoord)";
 
     // prepared statement -> statement zit een statement object in (nog geen data!)
     $statement = $this->pdo->prepare($query);
 
     // password hashen
-    //$hashed_password =  password_hash($Wachtwoord, PASSWORD_DEFAULT);
+    $hash = password_hash($wachtwoord, PASSWORD_DEFAULT);
 
     // execute de statement (deze maakt de db changes)
     $statement->execute([
     'voorletters'=>$voorletters,
     'voorvoegsels'=>$voorvoegsels,
-    'Achternaam'=>$Achternaam,
-    'Gebruikersnaam'=>$Gebruikersnaam,
-    'Wachtwoord'=>$hashed_password
+    'achternaam'=>$achternaam,
+    'gebruikersnaam'=>$gebruikersnaam,
+    'wachtwoord'=>$hash
   ]);
 
     // haalt de laatst toegevoegde id op uit de db
@@ -90,51 +63,28 @@ class database{
   }
 
 
-  private function create_or_update_artikel( $fabriek_id, $product, $type, $inkoopprijs, $verkooprprijs){
-    // table person vullen
-    $query = "INSERT INTO person
-          (id, fabriek_id, product, type, inkoopprijs, verkooprprijs)
-          VALUES
-          (NULL, :fabriek_id, :product, :type, :inkoopprijs, :verkooprprijs)";
 
-    // returned een statmenet object
-    $statement = $this->pdo->prepare($query);
-
-    // execute prepared statement
-    $statement->execute([
-    'fabriek_id'=>$fabriek_id,
-    'product'=>$product,
-    'type'=>$type,
-    'inkoopprijs'=>$inkoopprijs,
-    'verkooprprijs'=>$verkooprprijs,
-  ]);
-}
-
-// public function create_or_update_user($uname, $fname, $mname, $lname, $pass, $email){
+//   public function create_or_update_artikel( $fabriek_id, $product, $type, $inkoopprijs, $verkooprprijs){
+//     // table person vullen
+//     $query = "INSERT INTO person
+//           (id, fabriek_id, product, type, inkoopprijs, verkooprprijs)
+//           VALUES
+//           (NULL, :fabriek_id, :product, :type, :inkoopprijs, :verkooprprijs)";
 //
-//     try{
-//       // begin een database transaction
-//       $this->pdo->beginTransaction();
+//     // returned een statmenet object
+//     $statement = $this->pdo->prepare($query);
 //
-//       $account_id = $this->create_or_update_account($uname, $email, $pass);
-//
-//       $this->create_or_update_persoon($fname, $mname, $lname, $account_id);
-//
-//       // commit
-//       $this->pdo->commit();
-//
-//       header("location:login.php");
-//       exit();
-//
-//     }catch(Exception $e){
-//       // undo db changes in geval van error
-//       $this->pdo->rollback();
-//       throw $e;
-//     }
-//   }
+//     // execute prepared statement
+//     $statement->execute([
+//     'fabriek_id'=>$fabriek_id,
+//     'product'=>$product,
+//     'type'=>$type,
+//     'inkoopprijs'=>$inkoopprijs,
+//     'verkooprprijs'=>$verkooprprijs,
+//   ]);
 // }
 
-  public function authenticate_user($Gebruikersnaam, $Wachtwoord){
+  public function authenticate_user($gebruikersnaam, $wachtwoord){
     // hoe logt te user in? email of username of allebei? = username
     // haal de user op uit account a.d.h.v. de username
     // als database match, dan haal je het password (query with pdo)
@@ -145,33 +95,52 @@ class database{
     // echo hi $_SESSION['username']; htmlspecialchars()
 
     // maak een statement object op basis van de mysql query en sla deze op in $stmt
-    $query = "SELECT Wachtwoord FROM medewerker WHERE Gebruikersnaam = :Gebruikersnaam";
+    $query = "SELECT gebruikersnaam, wachtwoord FROM medewerker WHERE gebruikersnaam = :gebruikersnaam";
     $stmt = $this->pdo->prepare($query);
 
     // prepared statement object will be executed.
-    $stmt->execute(['Gebruikersnaam' => $Gebruikersnaam]); //-> araay
-    $result = $stmt->fetch(); // returned een array
+    $stmt->execute(['gebruikersnaam' => $gebruikersnaam]); //-> araay
+    $result = $stmt->fetch(PDO::FETCH_ASSOC); // returned een array
 
     // haalt de hashed password value op uit de db dataset
     // $hashed_password = $result['Wachtwoord'];
+// print_r($result['wachtwoord']);
+if(is_array($result) && count($result) > 0){ //fixme
+  // //$hashed_passwordpassword_verify
+  // // print_r( password_verify($wachtwoord, $result['wachtwoord']));
+  //   echo $result['wachtwoord'];
+  //       $hash = $result['wachtwoord'];
+  //       var_dump(password_verify($wachtwoord, $hash));
+  $hashed_password = $result['wachtwoord'];
 
-    $authenticated_user = false;
+  if(password_verify($wachtwoord, $hashed_password)){
+    echo 'yay';
+  }else{
+    echo ' invalid';
+  }
+      // if ($gebruikersnaam && password_verify($wachtwoord, $hashed_password)){//&& password_verify($wachtwoord, $hash)
+      //   echo 'bye';
+      //   $authenticated_user = true;
+      //
+      //   session_start();
+      //     // slaat userdata in sessie veriable
+      //     $_SESSION['gebruikersnaam'] = $gebruikersnaam;
+      //     $_SESSION['loggedin'] = true;
+      //     header("location: welkom.php");
+      //     exit();
+      // } else {
+      //     echo "invalid username and/or password";
+      // }
 
-//$hashed_passwordpassword_verify
-    if ($Gebruikersnaam && password_verify ($pass, $Wachtwoord)){
-      $authenticated_user = true;
-        header('location: welkom.php'); // todo: fixme, create page
-        exit();
-    } else {
-        echo "invalid username and/or password";
-    }
+      // if($authenticated_user){
+      //   // include date in title of log file -> error_log_8_10_2020.txt
+      //   error_log("datetime, ip address, username - has succesfully logged in",3, error_log.txt);// login datetime, ip address, usernameaction and whether its succesfull
+      // }else{
+      //   error_log("Invalid login",3);
+      // }
 
-    if($authenticated_user){
-      // include date in title of log file -> error_log_8_10_2020.txt
-      error_log("datetime, ip address, username - has succesfully logged in",3, error_log.txt);// login datetime, ip address, usernameaction and whether its succesfull
-    }else{
-      error_log("Invalid login",3);
-    }
+}
+
 
 
   //   try{
